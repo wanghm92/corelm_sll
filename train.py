@@ -38,6 +38,7 @@ parser.add_argument("--emb-path", dest="emb_path", help="(optional) Word embeddi
 parser.add_argument("--vocab", dest="vocab", help="(optional) Only needed if --emb-path is used.")
 parser.add_argument("--quiet", dest="quiet", action='store_true', help="Use this flag to disable the logger.")
 parser.add_argument( "--adjust-learning-rate", dest="enable_lr_adjust", action='store_true', help="Enable learning rate adjustment")
+parser.add_argument("-bm", "--base-model", dest="base_model_path", help="Base model used for adaptation")
 
 #parser.add_argument("-m","--model-file", dest="model_path",  help="The file path to load the model from")
 
@@ -109,6 +110,11 @@ else:
 classifier = MLP(args)
 
 L.info('Parameters: ' + str(classifier.params))
+
+if args.base_model_path is not None:
+    initialization_classifier = MLP(model_path=args.base_model_path)        
+    for param, aparam in zip(classifier.params, initialization_classifier.params):
+        param.set_value(aparam.get_value())
 
 #########################
 ## Training criterion

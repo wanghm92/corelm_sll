@@ -81,7 +81,8 @@ class FeaturesMemMapReader():
 	
 	def get_x(self, index):			## Get the  stacked x's
 		#return T.concatenate(self.shared_x_list, axis=1)[index * self.batch_size : (index+1) * self.batch_size]
-		return self.shared_x[index * self.batch_size : (index+1) * self.batch_size]
+		return self.shared_x[index * self.batch_size : (index+1) * self.batch_size] 
+		#return self.shared_x[index * self.batch_size + 1 : index * self.batch_size + self.shared_x[index * self.batch_size][0]+1]
 	
 	def get_y(self, index):
 		return self.shared_y[index * self.batch_size : (index+1) * self.batch_size]

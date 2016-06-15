@@ -28,15 +28,11 @@ class FeaturesMemMapReader():
 		fp = fp.reshape((len(fp)/self.ngram, self.ngram))
 
 		num_header_lines = fp[1,0]
-
-	
 		self.features_info = []    # Format (vocab_size, num_of_elements)
 		for i in xrange(num_header_lines-1):
 			self.features_info.append( (fp[i+2,0], fp[i+2,1]) )
 
-
 		self.num_classes = fp[(num_header_lines+2)-1,0]
-
 
 		# Setting minibatch size and number of mini batches
 		self.batch_size = batch_size
@@ -59,6 +55,25 @@ class FeaturesMemMapReader():
 		y = fp[num_header_lines+2:,self.ngram - 1]			# Reading the output word index
 		self.shared_y = T.cast(theano.shared(y, borrow=True), 'int32')
 		
+		
+		###################
+		# L.info("#num_samples = %s, #ngrams = %s, length of fp = %d, num_header_lines = %s " % (self.num_samples, self.ngram,len(fp), num_header_lines))
+
+		# print fp.shape
+		# print fp[0][:]
+		# print fp[1][:]
+		# print fp[2][:]
+		# print fp[3][:]
+		# print fp[4][:]
+		# print self.features_info
+		# print self.num_classes
+		# print self.batch_size
+		# print self.num_batches
+		# print x.shape
+		# print y.shape
+		# assert False
+		###################
+
 
 		## Untested instance weighting
 		self.is_weighted = False
@@ -79,13 +94,19 @@ class FeaturesMemMapReader():
 	
 	#### Accessors
 	
-	def get_x(self, index):			## Get the  stacked x's
+	def get_x(self, index, is_sll):			## Get the  stacked x's
 		#return T.concatenate(self.shared_x_list, axis=1)[index * self.batch_size : (index+1) * self.batch_size]
-		return self.shared_x[index * self.batch_size : (index+1) * self.batch_size] 
-		#return self.shared_x[index * self.batch_size + 1 : index * self.batch_size + self.shared_x[index * self.batch_size][0]+1]
+		
+		if is_sll:
+			return self.shared_x[index * self.batch_size + 1 : index * self.batch_size + self.shared_x[index * self.batch_size][0]+1]
+		else:
+			return self.shared_x[index * self.batch_size : (index+1) * self.batch_size] 
 	
-	def get_y(self, index):
-		return self.shared_y[index * self.batch_size : (index+1) * self.batch_size]
+	def get_y(self, index, is_sll):
+		if is_sll:
+			return self.shared_y[index * self.batch_size + 1 : index * self.batch_size + self.shared_y[index * self.batch_size]+1]
+		else:
+			return self.shared_y[index * self.batch_size : (index+1) * self.batch_size]
 
 	def get_x_from_list(self, index, feature_index):
 		return self.shared_x_list[feature_index][index * self.batch_size : (index+1) * self.batch_size]
@@ -93,7 +114,7 @@ class FeaturesMemMapReader():
 	def get_x_list(self, index):
 		return self.shared_x_list
 
-	def get_w(self, index):
+	def get_w(self, index, is_sll):
 		return self.shared_w[index * self.batch_size : (index+1) * self.batch_size]
 	
 	#### INFO

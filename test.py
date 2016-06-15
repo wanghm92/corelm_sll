@@ -65,7 +65,7 @@ else:
 ## Compiling theano function
 #
 
-evaluator = eval.Evaluator(testset, classifier)
+evaluator = eval.Evaluator(testset, classifier, is_sll=False)
 
 #########################
 ## Testing

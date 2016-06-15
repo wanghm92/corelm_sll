@@ -3,7 +3,7 @@ import theano
 import dlm.io.logging as L
 
 class SGD:
-	def __init__(self, classifier, criterion, learning_rate, trainset, clip_threshold=0):
+	def __init__(self, classifier, criterion, learning_rate, trainset, is_sll=False, clip_threshold=0):
 		self.eta = learning_rate
 		self.is_weighted = trainset.is_weighted
 		
@@ -30,9 +30,9 @@ class SGD:
 				outputs=[criterion.cost] + gparams,
 				updates=updates,
 				givens={
-					x: trainset.get_x(index),
-					y: trainset.get_y(index),
-					w: trainset.get_w(index)
+					x: trainset.get_x(index,is_sll),
+					y: trainset.get_y(index,is_sll),
+					w: trainset.get_w(index,is_sll)
 				}
 			)
 		else:
@@ -41,8 +41,8 @@ class SGD:
 				outputs=[criterion.cost] + gparams,
 				updates=updates,
 				givens={
-					x: trainset.get_x(index),
-					y: trainset.get_y(index)
+					x: trainset.get_x(index,is_sll),
+					y: trainset.get_y(index,is_sll)
 				}
 			)
 

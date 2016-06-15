@@ -23,7 +23,7 @@ parser.add_argument("-b", "--batch-size", dest="batchsize", default=128, type=in
 parser.add_argument("-l", "--learning-rate", dest="learning_rate", default=0.01, type=float, help="Learning rate. Default: 0.01")
 parser.add_argument("-D", "--learning-rate-decay", dest="learning_rate_decay", default=0, type=float, help="Learning rate decay (e.g. 0.995) (TO DO). Default: 0")
 parser.add_argument("-M", "--momentum", dest="momentum", default=0, type=float, help="Momentum (TO DO). Default: 0")
-parser.add_argument("-lf","--loss-function", dest="loss_function", default="nll", help="Loss function (nll|nce). Default: nll (Negative Log Likelihood)")
+parser.add_argument("-lf","--loss-function", dest="loss_function", default="nll", help="Loss function (nll|nce|sll). Default: nll (Negative Log Likelihood)")
 parser.add_argument("-ns","--noise-samples", dest="num_noise_samples", default=100 ,type=int, help="Number of noise samples for noise contrastive estimation. Default:100")
 parser.add_argument("-e", "--num-epochs", dest="num_epochs", default=50, type=int, help="Number of iterations (epochs). Default: 50")
 parser.add_argument("-c", "--self-norm-coef", dest="alpha", default=0, type=float, help="Self normalization coefficient (alpha). Default: 0")
@@ -90,6 +90,24 @@ else:
 	if args.testset:
 		testset = FeaturesMemMapReader(args.testset)
 
+is_sll = False
+if args.loss_function == 'sll':
+	is_sll = True
+
+is_sll = True
+
+#########################
+# print args.loss_function
+# import theano.tensor as T
+# import theano
+# x = trainset.get_x(0,args.loss_function)
+# testfuncx = theano.function(inputs=[],outputs=[x])
+# y = trainset.get_y(0,args.loss_function)
+# testfuncy = theano.function(inputs=[],outputs=[y])
+# print testfuncx()
+# print testfuncy()
+# assert False
+#########################
 
 #########################
 ## Creating model

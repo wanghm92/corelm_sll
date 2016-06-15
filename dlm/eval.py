@@ -11,7 +11,7 @@ import numpy as np
 
 class Evaluator():
 
-	def __init__(self, dataset, classifier):
+	def __init__(self, dataset, classifier, is_sll):
 
 		index = T.lscalar()
 		x = classifier.input
@@ -26,8 +26,8 @@ class Evaluator():
 				inputs=[index],
 				outputs=-T.sum(T.log(classifier.p_y_given_x(y))),
 				givens={
-					x: self.dataset.get_x(index),
-					y: self.dataset.get_y(index)
+					x: self.dataset.get_x(index,is_sll),
+					y: self.dataset.get_y(index,is_sll)
 				}
 			)
 
@@ -35,8 +35,8 @@ class Evaluator():
 				inputs=[index],
 				outputs=-T.sum(classifier.unnormalized_p_y_given_x(y)), # which is: -T.sum(T.log(T.exp(classifier.unnormalized_p_y_given_x(y))))
 				givens={
-					x: self.dataset.get_x(index),
-					y: self.dataset.get_y(index)
+					x: self.dataset.get_x(index,is_sll),
+					y: self.dataset.get_y(index,is_sll)
 				}
 			)
 
@@ -44,8 +44,8 @@ class Evaluator():
 				inputs=[index],
 				outputs=classifier.errors(y),
 				givens={
-					x: self.dataset.get_x(index),
-					y: self.dataset.get_y(index)
+					x: self.dataset.get_x(index,is_sll),
+					y: self.dataset.get_y(index,is_sll)
 				}
 			)
 
@@ -57,7 +57,7 @@ class Evaluator():
 				inputs=[index],
 				outputs=classifier.log_Z_sqr,
 				givens={
-					x: self.dataset.get_x(index)
+					x: self.dataset.get_x(index,is_sll)
 				}
 			)
 
@@ -65,14 +65,14 @@ class Evaluator():
 				inputs=[index],
 				outputs=classifier.p_y_given_x_matrix,
 				givens={
-					x:self.dataset.get_x(index)
+					x:self.dataset.get_x(index,is_sll)
 				}
 			)
 			self.get_y_pred = theano.function(
 				inputs=[index],
 				outputs=classifier.y_pred,
 				givens={
-					x:self.dataset.get_x(index)
+					x:self.dataset.get_x(index,is_sll)
 				}
 			)
 		# End of if

@@ -19,9 +19,15 @@ def train(classifier, criterion, args, trainset, devset, testset=None):
 
 	# Get number of minibatches from the training file
 	num_train_batches = trainset.get_num_batches()
+
+	is_sll = False
+	if args.loss_function == 'sll':
+		is_sll = True
 	
+	is_sll=True
+
 	# Initialize the trainer object
-	trainer = Trainer(classifier, criterion, args.learning_rate, trainset, clip_threshold=args.clip_threshold)
+	trainer = Trainer(classifier, criterion, args.learning_rate, trainset, is_sll, clip_threshold=args.clip_threshold)
 
 	# Initialize the Learning Rate tuner, which adjusts learning rate based on the development/validation file
 	lr_tuner = LRTuner(low=0.01*args.learning_rate, high=10*args.learning_rate, inc=0.01*args.learning_rate)
@@ -75,12 +81,12 @@ def train(classifier, criterion, args, trainset, devset, testset=None):
 
 
 class Hook:
-	def __init__(self, classifier, devset, testset, total_num_iter, out_dir):
+	def __init__(self, classifier, devset, testset, total_num_iter, out_dir, is_sll=False):
 		self.classifier = classifier
-		self.dev_eval = eval.Evaluator(dataset=devset, classifier=classifier)
+		self.dev_eval = eval.Evaluator(dataset=devset, classifier=classifier, is_sll=False)
 		self.test_eval = None
 		if testset:
-			self.test_eval = eval.Evaluator(dataset=testset, classifier=classifier)
+			self.test_eval = eval.Evaluator(dataset=testset, classifier=classifier, is_sll=False)
 		self.best_iter = 0
 		self.best_dev_perplexity = np.inf
 		self.best_test_perplexity = np.inf

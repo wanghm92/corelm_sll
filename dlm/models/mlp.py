@@ -59,7 +59,24 @@ class MLP(classifier.Classifier):
 			pass
 		
 		rng = numpy.random.RandomState(1234)
+
 		self.input = T.imatrix('input')
+		
+		######################################################################
+		## Transition Score Matrix
+		#
+		high = 0.01
+		A_values = numpy.asarray(
+			rng.uniform(
+				low=-high,
+				high=high,
+				size=(num_classes, num_classes)
+			),
+			dtype=theano.config.floatX
+		)
+		A = theano.shared(value=A_values, name='A', borrow=True)
+		self.A = A
+		# self.params.append(self.A)
 
 		######################################################################
 		## Lookup Table Layer

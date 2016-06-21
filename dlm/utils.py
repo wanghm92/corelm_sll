@@ -171,7 +171,6 @@ def set_theano_device(device, threads):
 	os.environ['THEANO_FLAGS'] += ',floatX=float32'
 	os.environ['THEANO_FLAGS'] += ',warn_float64=warn'
 	os.environ['THEANO_FLAGS'] += ',cast_policy=numpy+floatX'
-	# os.environ['THEANO_FLAGS'] += ',cuda.root=/usr/local/cuda'
 	#os.environ['THEANO_FLAGS'] += ',allow_gc=True'
 	os.environ['THEANO_FLAGS'] += ',print_active_device=False'
 	os.environ['THEANO_FLAGS'] += ',exception_verbosity=high'		# Highly verbose debugging

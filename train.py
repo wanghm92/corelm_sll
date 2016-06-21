@@ -74,38 +74,43 @@ from dlm.io.featuresmmapReader import FeaturesMemMapReader
 
 from dlm.models.mlp import MLP
 
+is_sll = False
+if args.loss_function == 'sll':
+	is_sll = True
+
 #########################
 ## Loading datasets
 #
 if args.feature_emb_dim is None:
-	trainset = FeaturesMemMapReader(args.trainset, batch_size=args.batchsize, instance_weights_path=args.instance_weights_path)
+	trainset = FeaturesMemMapReader(args.trainset, is_sll, batch_size=args.batchsize, instance_weights_path=args.instance_weights_path)
 	devset = FeaturesMemMapReader(args.devset)
 	testset = None
 	if args.testset:
 		testset = FeaturesMemMapReader(args.testset)
 else:														
-	trainset = FeaturesMemMapReader(args.trainset, batch_size=args.batchsize)
+	trainset = FeaturesMemMapReader(args.trainset, is_sll, batch_size=args.batchsize)
 	devset = FeaturesMemMapReader(args.devset)
 	testset = None
 	if args.testset:
 		testset = FeaturesMemMapReader(args.testset)
 
-is_sll = False
-if args.loss_function == 'sll':
-	is_sll = True
-
-is_sll = True
 
 #########################
 # print args.loss_function
 # import theano.tensor as T
 # import theano
-# x = trainset.get_x(0,args.loss_function)
-# testfuncx = theano.function(inputs=[],outputs=[x])
-# y = trainset.get_y(0,args.loss_function)
-# testfuncy = theano.function(inputs=[],outputs=[y])
-# print testfuncx()
-# print testfuncy()
+# x0 = trainset.get_x(639,args.loss_function)
+# testfuncx0 = theano.function(inputs=[],outputs=[x0])
+# y0 = trainset.get_y(639,args.loss_function)
+# testfuncy0 = theano.function(inputs=[],outputs=[y0])
+# x1 = trainset.get_x(640,args.loss_function)
+# testfuncx1 = theano.function(inputs=[],outputs=[x1])
+# y1 = trainset.get_y(640,args.loss_function)
+# testfuncy1 = theano.function(inputs=[],outputs=[y1])
+# print testfuncx0()
+# print testfuncx1()
+# print testfuncy0()
+# print testfuncy1()
 # assert False
 #########################
 
@@ -140,6 +145,9 @@ if args.base_model_path is not None:
 if args.loss_function == "nll":
 	from dlm.criterions.nll import NegLogLikelihood
 	criterion = NegLogLikelihood(classifier, args)
+elif args.loss_function == "sll":
+	from dlm.criterions.sll import SentenceLevelLogLikelihood
+	criterion = SentenceLevelLogLikelihood(classifier, args)
 elif args.loss_function == "nce":
 	from dlm.criterions.nce import NCELikelihood
 	noise_dist = trainset.get_unigram_model()

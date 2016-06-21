@@ -190,7 +190,7 @@ with open(args.input_path, 'r') as input_file, open(args.labels_path, 'r') as la
 
 			#### Add tag to the sample ####
 			sample.append(label)
-			sample_idx.append(label_to_id[label])
+			sample_idx.append(label_to_id[label]+1)
 
 			if args.shuffle:
 				samples.append(sample)
@@ -243,7 +243,7 @@ with open(tmp_path, 'r') as data:
 		fp[3,0] = feature_vocab_size
 		fp[3,1] = args.context_size												
 		fp[4,0] = label_vocab_size
-		fp[4,1] = 1
+		fp[4,1] = max_len
 		counter = 5
 	else:
 		fp[1,0] = 2 												# No. of header lines

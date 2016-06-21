@@ -38,7 +38,7 @@ class SGD:
 		else:
 			self.step_func = theano.function(
 				inputs=[index, lr],
-				outputs=[criterion.cost] + gparams,
+				outputs=[criterion.cost, criterion.scores, criterion.delta_0, criterion.delta, criterion.delta_logadd, criterion.transitions_tranc, criterion.delta_matrix, criterion.t] + gparams,
 				updates=updates,
 				givens={
 					x: trainset.get_x(index,is_sll),
@@ -46,10 +46,25 @@ class SGD:
 				}
 			)
 
+		# self.step_func_test = theano.function(
+		# 	inputs=[index],
+		# 	outputs=[criterion.delta_logadd],
+		# 	givens={
+		# 		x: trainset.get_x(index,is_sll),
+		# 		y: trainset.get_y(index,is_sll)
+		# 	},
+		# 	on_unused_input='warn'
+		# )
+
 	def step(self, minibatch_index):
-		outputs = self.step_func(minibatch_index, self.eta)
-		step_cost, gparams = outputs[0], outputs[1:]
-		return step_cost, gparams
+		outputs = self.step_func(minibatch_index, self.eta) # original
+		# outputs = self.step_func_test(minibatch_index)
+		# a = self.step_func_test(minibatch_index)
+		# step_cost, gparams = outputs[0], outputs[1:] # original
+		a,b,c,d,e,f,g,h, gparams = outputs[0],outputs[1],outputs[2],outputs[3],outputs[4],outputs[5],outputs[6],outputs[7],outputs[7:] # original
+		# return a
+		# return step_cost, gparams
+		return a,b,c,d,e,f,g,h, gparams
 
 	def set_learning_rate(self, eta):
 		self.eta = eta

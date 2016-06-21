@@ -41,8 +41,8 @@ class MLP(classifier.Classifier):
 				feature_info = feature_info + (feature_dim,)
 				features_info.append(feature_info)
 
-		print "Classifier Creation"
-		print features_info
+		L.info(U.red("Classifier Creation"))
+		L.info("features_info: %s" %U.red(features_info)) 
 		num_classes = args.num_classes
 		activation_name = args.activation_name
 		self.args = args
@@ -70,13 +70,18 @@ class MLP(classifier.Classifier):
 			rng.uniform(
 				low=-high,
 				high=high,
-				size=(num_classes, num_classes)
+				size=(num_classes+1, num_classes)
 			),
 			dtype=theano.config.floatX
 		)
 		A = theano.shared(value=A_values, name='A', borrow=True)
+
+		L.info("Transition Score, dimension %s" % U.red(A_values.shape))
+
 		self.A = A
-		# self.params.append(self.A)
+		if args.loss_function == 'sll':
+			L.info("Transition Score, dimension %s is appended to params" % U.red(A_values.shape))
+			self.params.append(self.A)
 
 		######################################################################
 		## Lookup Table Layer
@@ -196,6 +201,9 @@ class MLP(classifier.Classifier):
 		else:
 			#return -T.mean( T.log(self.p_y_given_x(y)))						# Unstable : can lead to NaN
 			return -T.mean(self.log_p_y_given_x(y))								# Stable Version
+
+	def score_output(self):
+		return self.output
 
 	def errors(self, y):
 		if y.ndim != self.y_pred.ndim:

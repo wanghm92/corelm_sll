@@ -12,7 +12,7 @@ class FeaturesMemMapReader():
 	
 	#### Constructor
 	
-	def __init__(self, dataset_path, batch_size=500, instance_weights_path=None):
+	def __init__(self, dataset_path, is_sll=False, batch_size=500, instance_weights_path=None):
 		
 		L.info("Initializing dataset (with features) from: " + os.path.abspath(dataset_path))
 		
@@ -33,9 +33,18 @@ class FeaturesMemMapReader():
 			self.features_info.append( (fp[i+2,0], fp[i+2,1]) )
 
 		self.num_classes = fp[(num_header_lines+2)-1,0]
+		self.max_sent_len = fp[(num_header_lines+2)-1,1]
 
 		# Setting minibatch size and number of mini batches
-		self.batch_size = batch_size
+		if is_sll:
+			self.batch_size = self.max_sent_len
+			L.warning("Batch Size is replaced by the maximum sentence length since loss function is SLL")
+		else:
+			self.batch_size = batch_size
+
+		# print self.max_sent_len, self.batch_size
+		# assert False
+		
 		self.num_batches = int(M.ceil(self.num_samples / self.batch_size))
 
 		# Reading the matrix of samples
@@ -98,13 +107,13 @@ class FeaturesMemMapReader():
 		#return T.concatenate(self.shared_x_list, axis=1)[index * self.batch_size : (index+1) * self.batch_size]
 		
 		if is_sll:
-			return self.shared_x[index * self.batch_size + 1 : index * self.batch_size + self.shared_x[index * self.batch_size][0]+1]
+			return self.shared_x[index * (self.batch_size + 1) + 1: index * (self.batch_size + 1) + self.shared_x[index * (self.batch_size + 1)][0]+1]
 		else:
 			return self.shared_x[index * self.batch_size : (index+1) * self.batch_size] 
 	
 	def get_y(self, index, is_sll):
 		if is_sll:
-			return self.shared_y[index * self.batch_size + 1 : index * self.batch_size + self.shared_y[index * self.batch_size]+1]
+			return self.shared_y[index * (self.batch_size + 1) + 1: index * (self.batch_size + 1) + self.shared_y[index * (self.batch_size + 1)]+1]
 		else:
 			return self.shared_y[index * self.batch_size : (index+1) * self.batch_size]
 

@@ -38,7 +38,7 @@ def train(classifier, criterion, args, trainset, devset, testset=None):
 	hook = Hook(classifier, devset, testset, total_num_iter, args.out_dir)
 	L.info('Training')
 	start_time = time.time()
-	verbose_freq = 1000 # minibatches
+	verbose_freq = 10 #00 # minibatches
 	epoch = 0
 	
 	hook.evaluate(0)
@@ -53,14 +53,41 @@ def train(classifier, criterion, args, trainset, devset, testset=None):
 		minibatch_avg_cost_sum = 0
 		for minibatch_index in xrange(num_train_batches):
 			# Makes an update of the paramters after processing the minibatch
-			minibatch_avg_cost, gparams = trainer.step(minibatch_index)
-			minibatch_avg_cost_sum += minibatch_avg_cost
+			print " ######## %d ######### " % minibatch_index
+
+			# a,b = trainer.step(minibatch_index)
 			
+			# print a
+			# print b
+			# # print c
+			# # print d
+			# if minibatch_index > 1:
+			# 	assert False
+
+			# minibatch_avg_cost, gparams = trainer.step(minibatch_index)
+			minibatch_avg_cost,b,c,d,e,f,g,h, gparams = trainer.step(minibatch_index)
+			print b
+			print "######"
+			print c
+			print "######"
+			print d
+			print "######"
+			print e
+			print "######"
+			print f
+			print "######"
+			print g
+			print "######"
+			print h
+			minibatch_avg_cost_sum += minibatch_avg_cost
+
+			# if False:
 			if minibatch_index % verbose_freq == 0:
 				grad_norms = [np.linalg.norm(gparam) for gparam in gparams]
-				L.info(U.blue("[" + time.ctime() + "] ") + '%i/%i, cost=%.2f, lr=%f'
-					% (minibatch_index, num_train_batches, minibatch_avg_cost_sum/(minibatch_index+1), trainer.get_learning_rate()))
+				L.info(U.blue("[" + time.ctime() + "] ") + '%i/%i, current cost=%.2f, total cost=%.2f, average cost=%.2f, lr=%f'
+					% (minibatch_index, num_train_batches, minibatch_avg_cost, minibatch_avg_cost_sum, minibatch_avg_cost_sum/(minibatch_index+1), trainer.get_learning_rate()))
 				L.info('Grad Norms: [' + ', '.join(['%.6f' % gnorm for gnorm in grad_norms]) + ']')
+				assert (minibatch_avg_cost_sum/(minibatch_index+1) < 100)
 			curr_iter = (epoch - 1) * num_train_batches + minibatch_index
 			if curr_iter > 0 and curr_iter % validation_frequency == 0:
 				hook.evaluate(curr_iter)
@@ -98,6 +125,8 @@ class Hook:
 		denominator = self.dev_eval.get_denominator()
 		dev_error = self.dev_eval.classification_error()
 		dev_perplexity = self.dev_eval.perplexity()
+
+
 		if self.test_eval:
 			test_error = self.test_eval.classification_error()
 			test_perplexity = self.test_eval.perplexity()

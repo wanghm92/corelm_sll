@@ -23,83 +23,66 @@ class SentenceLevelLogLikelihood():
 		)
 
 	def calculate_cost_sll(self, scores, args):
-		"""
-		Calculates the output and transition deltas for each token, using Sentence Level Likelihood.
-		The aim is to minimize the cost:
-		C(theta,A) = logadd(scores for all possible paths) - score(correct path)
 
-		:returns: if True, normal gradient calculation was performed.
-		    If False, the error was too low and weight correction should be
-		    skipped.
-		"""
+		self.scores = scores
 
-		# ftheta_i,t = network output for i-th tag, at t-th word
-		# s = Sum_i(A_tags[i-1],tags[i] + ftheta_i,i), i < len(sentence)   (12)
+		self.yplus1 = self.y + 1
 
-		self.y_roll = T.cast(T.roll(self.y,1), theano.config.floatX)
+		self.s = scores[T.arange(self.y.shape[0]), self.y]
+
+		self.y_roll = T.cast(T.roll(self.yplus1,1), theano.config.floatX)
 
 		self.y_w = T.cast(T.gt(T.arange(self.y.shape[0]), 0.5), theano.config.floatX)
 
 		self.y_shift = T.cast(self.y_roll * self.y_w, 'int32')
 
-		self.scores = scores # for test
-
-		self.ym1 = self.y-1 # for test
-
-		self.s = scores[T.arange(self.y.shape[0]), self.y-1]
-
-		self.t = self.transitions[self.y_shift, self.y-1]
+		self.t = self.transitions[self.y_shift, self.y]
 
 		self.correct_path_score = T.sum(self.t + self.s)
 
-		# delta[t] = delta_t in equation (14)
 		self.delta = self.calculate_delta(scores)
 
-		# logadd_i(delta_T(i)) = log(Sum_i(exp(delta_T(i))))
-		# Sentence-level Log-Likelihood (SLL)
-		# C(ftheta,A) = logadd_j(s(x, j, theta, A)) - score(correct path)
-		self.delta_logadd = T.log(T.sum(T.exp(self.delta), axis=0))
-		self.cost = self.delta_logadd - self.correct_path_score
+		self.delta_max = T.max(self.delta)
+		self.delta_logadd = T.log(T.sum(T.exp(self.delta - self.delta_max), axis=0)) + self.delta_max
+
+		self.cost = self.delta_logadd - self.correct_path_score #) / (T.cast(self.y.shape[0], theano.config.floatX))
 
 		return self.cost
 
 	def calculate_delta(self, scores):
-		"""
-		Calculates a matrix with the scores for all possible paths at all given
-		points (tokens).
-		In the returned matrix, delta[i][j] means the sum of all scores 
-		ending in token i with tag j (delta_i(j) in eq. 14 in the paper)
-		"""
-		# logadd for first token. the transition score of the starting tag must be used.
-		# it turns out that logadd = log(exp(score)) = score
-		# (use long double because taking exp's leads to very very big numbers)
-		# scores[t][k] = ftheta_k,t
-		# delta = scores
 
-		# transitions[-1] represents initial transition, A_0,i in paper (mispelled as A_i,0)
-		# delta_0(k) = ftheta_k,0 + A_0,i
-		# delta[0] += self.transitions[-1]
-		self.delta_0 = self.transitions[0] + scores[0] 
+		self.delta_0 = self.transitions[0] + scores[0]
 
-		# logadd for the remaining tokens
-		# delta_t(k) = ftheta_k,t + logadd_i(delta_t-1(i) + A_i,k)
-		#            = ftheta_k,t + log(Sum_i(exp(delta_t-1(i) + A_i,k)))
+		# self.transitions_max = T.max(self.transitions[0])
+		# self.transitions_logadd = T.log(T.sum(T.exp(self.transitions[0] - self.transitions_max), axis=0)) + self.transitions_max
+		# self.delta_0 = self.transitions_logadd + scores[0]
+			
 		self.transitions_tranc = self.transitions[1:].T # A_k,i
+		self.scores_roll = T.roll(scores, -scores.shape[1])
 
 		def calculate_delta_recursively(net_scores, delta_prev):
 			temp = delta_prev + self.transitions_tranc
-			logadd = T.log(T.sum(T.exp(temp), axis=1))
+			temp_max = T.max(temp, axis=1)
+			logadd = T.log(T.sum(T.exp(temp.T-temp_max), axis=0)) + temp_max
 			delta = net_scores + logadd
 
-			return delta
+			return temp, temp_max, logadd, delta
 
-		delta, updates = theano.scan(
+		[temp, temp_max, logadd, delta], updates = theano.scan(
 			calculate_delta_recursively,
-			sequences=[scores],
-			outputs_info=[dict(initial=self.delta_0)])
+			sequences=[self.scores_roll],
+			outputs_info=[None,None,None, dict(initial=self.delta_0)])
 		
+		self.temp_matrix = temp
+		self.temp_max_matrix = temp_max
+		self.logadd_matrix = logadd
 		self.delta_matrix = delta
 
-		return delta[-1]
+		self.delta_flat = T.flatten(delta)
+		self.delta_full_flat = T.concatenate([self.delta_0, self.delta_flat],axis=0)
+		self.delta_full_stack = T.reshape(self.delta_full_flat,(delta.shape[0]+1,delta.shape[1]))
+		
+		return self.delta_full_stack[-2]
+
 
 

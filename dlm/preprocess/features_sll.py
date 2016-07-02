@@ -190,7 +190,7 @@ with open(args.input_path, 'r') as input_file, open(args.labels_path, 'r') as la
 
 			#### Add tag to the sample ####
 			sample.append(label)
-			sample_idx.append(label_to_id[label]+1)
+			sample_idx.append(label_to_id[label])
 
 			if args.shuffle:
 				samples.append(sample)

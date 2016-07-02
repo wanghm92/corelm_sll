@@ -38,14 +38,11 @@ class FeaturesMemMapReader():
 		# Setting minibatch size and number of mini batches
 		if is_sll:
 			self.batch_size = self.max_sent_len
-			L.warning("Batch Size is replaced by the maximum sentence length since loss function is SLL")
+			L.warning("Batch Size is replaced by the maximum sentence length of %s since loss function is SLL" % U.red(self.max_sent_len) )
+			self.num_batches = int(M.ceil(self.num_samples / (self.batch_size + 1)))
 		else:
 			self.batch_size = batch_size
-
-		# print self.max_sent_len, self.batch_size
-		# assert False
-		
-		self.num_batches = int(M.ceil(self.num_samples / self.batch_size))
+			self.num_batches = int(M.ceil(self.num_samples / self.batch_size))
 
 		# Reading the matrix of samples
 		# x is list

@@ -108,6 +108,8 @@ class MLP(classifier.Classifier):
 			else:
 				last_layer_output = T.concatenate([last_layer_output, lookupTableLayer.output], axis=1)
 			
+			self.looktbout = last_layer_output #DEBUG
+
 			last_layer_output_size +=  (num_elems) * emb_dim
 			self.params += lookupTableLayer.params
 			last_start_pos = last_start_pos + num_elems
@@ -127,12 +129,17 @@ class MLP(classifier.Classifier):
 			last_layer_output_size = num_hidden_list[i]
 			self.params += linearLayer.params
 			
+			self.hidout = last_layer_output #DEBUG
+			self.hidparams = linearLayer.params #DEBUG
+
 			activation = Activation(
 				input=last_layer_output,
 				func_name=activation_name
 			)
 			last_layer_output = activation.output
-			
+
+			self.actout = last_layer_output #DEBUG
+
 			self.L1 = self.L1 + abs(linearLayer.W).sum()
 			self.L2_sqr = self.L2_sqr + (linearLayer.W ** 2).sum()
 		
@@ -150,6 +157,8 @@ class MLP(classifier.Classifier):
 		)
 		last_layer_output = linearLayer.output
 		self.params += linearLayer.params
+
+		self.linearparams = linearLayer.params #DEBUG
 		
 		self.L1 = self.L1 + abs(linearLayer.W).sum()
 		self.L2_sqr = self.L2_sqr + (linearLayer.W ** 2).sum()

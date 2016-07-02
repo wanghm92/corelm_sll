@@ -36,35 +36,33 @@ class SGD:
 				}
 			)
 		else:
+			'''
 			self.step_func = theano.function(
 				inputs=[index, lr],
-				outputs=[criterion.cost, criterion.scores, criterion.delta_0, criterion.delta, criterion.delta_logadd, criterion.transitions_tranc, criterion.delta_matrix, criterion.t] + gparams,
+				outputs=[criterion.cost] + gparams,
 				updates=updates,
 				givens={
 					x: trainset.get_x(index,is_sll),
 					y: trainset.get_y(index,is_sll)
 				}
 			)
-
-		# self.step_func_test = theano.function(
-		# 	inputs=[index],
-		# 	outputs=[criterion.delta_logadd],
-		# 	givens={
-		# 		x: trainset.get_x(index,is_sll),
-		# 		y: trainset.get_y(index,is_sll)
-		# 	},
-		# 	on_unused_input='warn'
-		# )
-
+			'''
+			self.step_func = theano.function(
+				inputs=[index, lr],
+				outputs=[criterion.cost, criterion.scores, criterion.scores_roll, criterion.transitions, criterion.delta_0, criterion.temp_matrix, criterion.temp_max_matrix, criterion.logadd_matrix, criterion.delta_matrix, criterion.delta_full_stack, criterion.delta, criterion.delta_logadd, criterion.y_roll, criterion.y_w, criterion.y_shift, criterion.yplus1, criterion.s, criterion.t, criterion.correct_path_score,classifier.looktbout,classifier.hidout, classifier.actout, classifier.hidparams[0],classifier.hidparams[1], classifier.linearparams[0], classifier.linearparams[1]] + gparams,
+				updates=updates,
+				givens={
+					x: trainset.get_x(index,is_sll),
+					y: trainset.get_y(index,is_sll)
+				}
+			)
+			
 	def step(self, minibatch_index):
 		outputs = self.step_func(minibatch_index, self.eta) # original
-		# outputs = self.step_func_test(minibatch_index)
-		# a = self.step_func_test(minibatch_index)
 		# step_cost, gparams = outputs[0], outputs[1:] # original
-		a,b,c,d,e,f,g,h, gparams = outputs[0],outputs[1],outputs[2],outputs[3],outputs[4],outputs[5],outputs[6],outputs[7],outputs[7:] # original
-		# return a
-		# return step_cost, gparams
-		return a,b,c,d,e,f,g,h, gparams
+		a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z, gparams = outputs[0],outputs[1],outputs[2],outputs[3],outputs[4],outputs[5],outputs[6],outputs[7],outputs[8],outputs[9],outputs[10],outputs[11],outputs[12],outputs[13],outputs[14],outputs[15],outputs[16],outputs[17],outputs[18],outputs[19],outputs[20],outputs[21],outputs[22],outputs[23],outputs[24],outputs[25],outputs[26:]
+		# return step_cost, gparams # original
+		return a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z, gparams
 
 	def set_learning_rate(self, eta):
 		self.eta = eta

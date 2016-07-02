@@ -74,9 +74,7 @@ from dlm.io.featuresmmapReader import FeaturesMemMapReader
 
 from dlm.models.mlp import MLP
 
-is_sll = False
-if args.loss_function == 'sll':
-	is_sll = True
+is_sll = args.loss_function == 'sll'
 
 #########################
 ## Loading datasets
@@ -96,21 +94,22 @@ else:
 
 
 #########################
-# print args.loss_function
-# import theano.tensor as T
-# import theano
-# x0 = trainset.get_x(639,args.loss_function)
-# testfuncx0 = theano.function(inputs=[],outputs=[x0])
-# y0 = trainset.get_y(639,args.loss_function)
-# testfuncy0 = theano.function(inputs=[],outputs=[y0])
-# x1 = trainset.get_x(640,args.loss_function)
-# testfuncx1 = theano.function(inputs=[],outputs=[x1])
-# y1 = trainset.get_y(640,args.loss_function)
-# testfuncy1 = theano.function(inputs=[],outputs=[y1])
-# print testfuncx0()
-# print testfuncx1()
-# print testfuncy0()
-# print testfuncy1()
+print args.loss_function
+import theano.tensor as T
+import numpy as np
+import theano
+x0 = trainset.get_x(0,args.loss_function)
+testfuncx0 = theano.function(inputs=[],outputs=[x0])
+y0 = trainset.get_y(0,args.loss_function)
+testfuncy0 = theano.function(inputs=[],outputs=[y0])
+x1 = trainset.get_x(1,args.loss_function)
+testfuncx1 = theano.function(inputs=[],outputs=[x1])
+y1 = trainset.get_y(1,args.loss_function)
+testfuncy1 = theano.function(inputs=[],outputs=[y1])
+print testfuncx0()
+print testfuncy0()
+print testfuncx1()
+print testfuncy1()
 # assert False
 #########################
 
